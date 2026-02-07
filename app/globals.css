@@ -6,11 +6,12 @@
 
 @import "tailwindcss";
 
-* {
-  margin: 0;
-  padding: 0;
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
+
 
 html {
   background-color: #101114;
@@ -167,6 +168,12 @@ html {
 
 .border-black-6 {
   border-color: #222429;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ===== custom classes ===== */

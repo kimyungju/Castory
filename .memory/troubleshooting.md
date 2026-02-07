@@ -26,6 +26,19 @@
 - Fix: Replaced dead Convex URLs in `constants/index.ts` with local SVG thumbnails at `/images/podcast-{1-4}.svg`. These are guaranteed to resolve since they live in `public/`.
 - Note: Once we set up our own Convex deployment with real podcast data, these seed thumbnails will be replaced by actual storage URLs.
 
+### Issue 5: Clerk /sign-in card left-aligned and misaligned divider
+- Summary: The Clerk SignIn card was stuck to the left side of the page. Social buttons and "or" divider were mis-centered.
+- Root cause (3 factors):
+  1. `* { margin: 0; padding: 0; }` global CSS reset was stripping all internal margins/padding from Clerk's own DOM elements, breaking their card layout.
+  2. `@layer base { * { @apply border-border } }` applied borders to every element including Clerk internals.
+  3. `colorPrimary: ""` (empty string) in Clerk appearance config broke the primary button color.
+- Fix:
+  - Replaced the aggressive `* { margin: 0; padding: 0; }` with `* { box-sizing: border-box; }` only.
+  - Set `colorPrimary: "#f97535"` (orange theme) instead of empty string.
+  - Auth layout uses `flex min-h-screen items-center justify-center bg-black-3 px-4` for proper centering.
+  - Sign-in/sign-up pages render bare `<SignIn />` / `<SignUp />` with no extra wrappers.
+- Rule: Never use a global `* { margin: 0; padding: 0; }` reset — it breaks third-party component libraries like Clerk. Use `box-sizing: border-box` only.
+
 ### Preventative rules
 - After changing `next.config.ts`, always restart the dev server (or clear `.next` cache).
 - Every image component should use `normalizeImageSrc()` and have a fallback.

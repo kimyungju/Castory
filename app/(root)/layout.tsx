@@ -5,9 +5,17 @@ import LeftSidebar from "@/components/LeftSidebar";
 import RightSidebar from "@/components/RightSidebar";
 import MobileNav from "@/components/MobileNav";
 import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
-import { SignInButton } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { Loader } from "lucide-react";
+import { useEffect } from "react";
+
+function RedirectToSignIn() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace("/sign-in");
+  }, [router]);
+  return null;
+}
 
 export default function RootGroupLayout({
   children,
@@ -23,18 +31,7 @@ export default function RootGroupLayout({
       </AuthLoading>
 
       <Unauthenticated>
-        <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-black-3">
-          <Image src="/icons/logo.svg" alt="logo" width={40} height={46} />
-          <h1 className="text-24 font-bold text-white-1">
-            Welcome to Podcaster
-          </h1>
-          <p className="text-16 text-white-2">Sign in to continue</p>
-          <SignInButton mode="modal">
-            <button className="rounded-lg bg-orange-1 px-6 py-3 text-16 font-bold text-white transition-colors hover:bg-orange-1/80">
-              Sign In
-            </button>
-          </SignInButton>
-        </div>
+        <RedirectToSignIn />
       </Unauthenticated>
 
       <Authenticated>

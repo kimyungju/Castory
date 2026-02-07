@@ -22,4 +22,12 @@
 - 2026-02-07: Created sign-in and sign-up catch-all pages under (auth) using Clerk components.
 - 2026-02-07: Switched ConvexClerkProvider to use @clerk/nextjs instead of @clerk/clerk-react.
 - 2026-02-07: Added CLERK_SIGN_IN_URL and CLERK_SIGN_UP_URL env vars.
+- 2026-02-07: Fixed /sign-in routing — (root)/layout now redirects unauthenticated users to /sign-in instead of modal.
+- 2026-02-07: Added Log Out button to LeftSidebar using Clerk's signOut().
+- 2026-02-07: Cleaned up auth pages — minimal (auth)/layout.tsx centers children on dark bg, sign-in/sign-up pages render bare Clerk components. No app shell overlap.
+- 2026-02-07: Added Clerk appearance config in ConvexClerkProvider (dark theme, custom logo, icon social buttons).
+- 2026-02-07: Created convex/http.ts webhook handler and convex/user.ts with CRUD mutations for Clerk user sync.
+- 2026-02-07: Added middleware.ts with Clerk auth protecting non-public routes, /sign-in and /sign-up and / are public.
+- 2026-02-07: Added flex-center and bg-orange-1 CSS utility classes.
+- 2026-02-07: Fixed Clerk sign-in card alignment — removed aggressive `* { margin:0; padding:0 }` global reset that broke Clerk internals. Set colorPrimary to #f97535. Auth layout now properly centers with flex.
 
