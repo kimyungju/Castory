@@ -1,17 +1,33 @@
 ## Troubleshooting Log
 
-### Issue
-- Summary:
-- Environment:
-- Error Message:
+### Issue 1: Missing public/ directory
+- Summary: All `<Image />` components showed broken placeholders.
+- Root cause: `public/` directory did not exist. Asset zip had not been downloaded.
+- Fix: Created `public/icons/` with placeholder SVGs, then replaced with real assets from tutorial zip.
 
-### Investigation
-- What was checked:
-- Hypotheses:
+### Issue 2: Remote images blocked by next/image
+- Summary: Podcast thumbnails from Convex (lovely-flamingo-139.convex.cloud) threw runtime error.
+- Error: `Invalid src prop — hostname not configured under images in next.config.js`
+- Root cause: `next.config.ts` was missing `images.remotePatterns`. Also, the dev server was not restarted after adding the config.
+- Fix: Added `remotePatterns` with `protocol: "https"` and `hostname: "lovely-flamingo-139.convex.cloud"`. Cleared `.next` cache.
 
-### Resolution
+### Issue 3: Comprehensive image safety
+- Summary: No fallback for empty/invalid image src; no path normalization.
 - Fix applied:
-- Verification steps:
+  - Created `normalizeImageSrc()` helper in `lib/utils.ts` — handles http URLs, absolute paths, `public/` prefix stripping, and empty/null fallback.
+  - Created `/public/placeholder.svg` as a universal fallback image.
+  - `PodcastCard` uses `onError` to swap broken remote images to placeholder.
+  - `LeftSidebar` runs all sidebar icon paths through `normalizeImageSrc()`.
+- Rule: All image paths from `public/` must use absolute paths (`/icons/...`), never `public/...` or relative paths.
 
-### Follow-ups
-- Preventative actions:
+### Issue 4: Podcast thumbnails showing "No Image" placeholder
+- Summary: Cards rendered but showed `/placeholder.svg` instead of real thumbnails.
+- Root cause: `imgURL` was NOT null — it contained valid-looking Convex URLs (`https://lovely-flamingo-139.convex.cloud/api/storage/...`), but those are from the tutorial creator's Convex deployment and have **expired/been deleted**. The `onError` handler correctly caught the 404 and swapped to placeholder.
+- Fix: Replaced dead Convex URLs in `constants/index.ts` with local SVG thumbnails at `/images/podcast-{1-4}.svg`. These are guaranteed to resolve since they live in `public/`.
+- Note: Once we set up our own Convex deployment with real podcast data, these seed thumbnails will be replaced by actual storage URLs.
+
+### Preventative rules
+- After changing `next.config.ts`, always restart the dev server (or clear `.next` cache).
+- Every image component should use `normalizeImageSrc()` and have a fallback.
+- When adding new remote image hosts, add them to `next.config.ts > images.remotePatterns`.
+- Never trust third-party demo storage URLs long-term — they expire. Use local assets for seed/mock data.

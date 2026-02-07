@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn, normalizeImageSrc } from "@/lib/utils";
 import { sidebarLinks } from "@/constants";
 
 const LeftSidebar = () => {
@@ -38,7 +38,12 @@ const LeftSidebar = () => {
                 }
               )}
             >
-              <Image src={imgURL} alt={label} width={24} height={24} />
+              <Image
+                src={normalizeImageSrc(imgURL)}
+                alt={label}
+                width={24}
+                height={24}
+              />
               <p className="max-lg:hidden">{label}</p>
             </Link>
           );

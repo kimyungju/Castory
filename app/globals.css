@@ -63,9 +63,60 @@ html {
   }
 }
 
+.text-12 {
+  font-size: 12px;
+  line-height: normal;
+}
+
+.text-14 {
+  font-size: 14px;
+  line-height: normal;
+}
+
+.text-16 {
+  font-size: 16px;
+  line-height: normal;
+}
+
+.text-18 {
+  font-size: 18px;
+  line-height: normal;
+}
+
+.text-20 {
+  font-size: 20px;
+  line-height: normal;
+}
+
 .text-24 {
   font-size: 24px;
   line-height: normal;
+}
+
+.text-32 {
+  font-size: 32px;
+  line-height: normal;
+}
+
+.podcast_grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+@media (min-width: 640px) {
+  .podcast_grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .podcast_grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1536px) {
+  .podcast_grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 /* ===== project color utilities ===== */
@@ -92,6 +143,10 @@ html {
 
 .text-white-2 {
   color: #c5d0e6;
+}
+
+.text-white-4 {
+  color: #71788b;
 }
 
 .text-gray-1 {

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="g4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06B6D4"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" rx="16" fill="url(#g4)"/>
+  <rect x="72" y="68" width="56" height="48" rx="6" fill="none" stroke="#fff" stroke-width="3"/>
+  <circle cx="100" cy="92" r="10" fill="none" stroke="#fff" stroke-width="2.5"/>
+  <line x1="107" y1="99" x2="116" y2="108" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+  <text x="100" y="154" text-anchor="middle" fill="#fff" font-family="sans-serif" font-size="10" font-weight="bold">TECH TALKS</text>
+  <text x="100" y="168" text-anchor="middle" fill="#fff" font-family="sans-serif" font-size="10" font-weight="bold">DAILY</text>
+</svg>
