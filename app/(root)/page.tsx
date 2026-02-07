@@ -13,7 +13,7 @@ const Home = () => {
     <div className="mt-9 flex flex-col gap-9">
       {/* Convex test data */}
       <div className="text-white-1">
-        {tasks?.map(({ _id, text }) => (
+        {tasks?.map(({ _id, text }: { _id: string; text: string }) => (
           <div key={_id}>{text}</div>
         ))}
       </div>

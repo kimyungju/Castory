@@ -4,9 +4,15 @@
 - Chosen for modern app routing, server components, and strong ecosystem support.
 - Enables rapid full-stack iteration with a single codebase.
 
-### Supabase
-- Provides managed Postgres, storage, and auth with a developer-friendly API.
-- Speeds up MVP delivery while remaining production-ready.
+### Convex (replaced Supabase)
+- Real-time reactive database with automatic TypeScript codegen.
+- Built-in file storage (`_storage`) for audio and images.
+- Search indexes for full-text search on podcasts.
+- Seamless Clerk integration via `convex/react-clerk`.
+
+### Clerk
+- Handles user authentication (sign-up, sign-in, session management).
+- Integrated with Convex via JWT verification for server-side auth.
 
 ### OpenAI
 - Reliable LLMs and embeddings for script generation and RAG.
