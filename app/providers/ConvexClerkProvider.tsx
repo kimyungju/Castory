@@ -24,6 +24,11 @@ const ConvexClerkProvider = ({ children }: { children: ReactNode }) => {
           colorInputBackground: "#1b1f29",
           colorInputText: "white",
         },
+        elements: {
+          socialButtonsBlockButton:
+            "border border-gray-600 hover:bg-[#222429] transition-colors",
+          socialButtonsBlockButtonArrow: "hidden",
+        },
       }}
     >
       <ConvexProviderWithClerk client={convex} useAuth={useAuth}>

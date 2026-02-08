@@ -1,8 +1,9 @@
 ## Decisions
 
-### Next.js 14
+### Next.js 16
 - Chosen for modern app routing, server components, and strong ecosystem support.
 - Enables rapid full-stack iteration with a single codebase.
+- Uses `proxy.ts` instead of `middleware.ts` (Next.js 16 deprecated the middleware file convention in favor of proxy).
 
 ### Convex (replaced Supabase)
 - Real-time reactive database with automatic TypeScript codegen.

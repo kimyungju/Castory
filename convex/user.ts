@@ -78,7 +78,8 @@ export const updateUser = internalMutation({
       .unique();
 
     if (!user) {
-      throw new ConvexError("User not found");
+      // User was never synced (e.g. user.created failed); no-op so webhook returns 200
+      return;
     }
 
     await ctx.db.patch(user._id, {
@@ -110,7 +111,8 @@ export const deleteUser = internalMutation({
       .unique();
 
     if (!user) {
-      throw new ConvexError("User not found");
+      // Already deleted or never synced; no-op so webhook returns 200
+      return;
     }
 
     await ctx.db.delete(user._id);

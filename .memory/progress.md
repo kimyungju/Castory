@@ -30,4 +30,6 @@
 - 2026-02-07: Added middleware.ts with Clerk auth protecting non-public routes, /sign-in and /sign-up and / are public.
 - 2026-02-07: Added flex-center and bg-orange-1 CSS utility classes.
 - 2026-02-07: Fixed Clerk sign-in card alignment — removed aggressive `* { margin:0; padding:0 }` global reset that broke Clerk internals. Set colorPrimary to #f97535. Auth layout now properly centers with flex.
+- 2026-02-07: Migrated middleware.ts → proxy.ts for Next.js 16 (middleware file convention deprecated, proxy is the replacement). Code unchanged, only filename.
+- 2026-02-07–08: Clerk webhook hardening — set CLERK_WEBHOOK_SECRET in Convex env via `npx convex env set`; run `npx convex dev` to deploy convex/ code. Fixed http.ts: try-catch around svix verify, safe first_name/email fallbacks, safe access to email_addresses[0] and image_url (fallbacks: `${id}@clerk.user`, `""`). Made user.updateUser and user.deleteUser no-op when user not found so webhook returns 200 and Clerk retries stop.
 

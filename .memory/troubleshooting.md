@@ -39,8 +39,27 @@
   - Sign-in/sign-up pages render bare `<SignIn />` / `<SignUp />` with no extra wrappers.
 - Rule: Never use a global `* { margin: 0; padding: 0; }` reset — it breaks third-party component libraries like Clerk. Use `box-sizing: border-box` only.
 
+### Issue 6: Clerk webhooks failing (all attempts return error)
+- Summary: All Clerk webhook events (user.created, user.updated) fail on Convex.
+- Root causes (3 bugs):
+  1. **CLERK_WEBHOOK_SECRET not in Convex env** — The secret was only in `.env.local` (Next.js), but Convex HTTP actions run on Convex's servers with their own separate environment. The handler threw "CLERK_WEBHOOK_SECRET is not defined" immediately, causing a 500 for every call. Fix: Must set the secret via `npx convex env set CLERK_WEBHOOK_SECRET "whsec_..."` or through the Convex Dashboard.
+  2. **No try-catch around `wh.verify()`** — If signature verification failed, `svix` threw an error that was not caught. Instead of returning `undefined` (which the caller handles gracefully as a 400), the unhandled throw caused a 500. Fix: Wrapped `wh.verify()` in try-catch, returning `undefined` on failure.
+  3. **`event.data.first_name` can be null** — OAuth sign-ups (Google/GitHub) may not have `first_name`. The `!` TypeScript assertion does nothing at runtime; `null` was passed to `createUser` which expects `v.string()`, causing the mutation to reject. Fix: Added `?? email_prefix ?? "Unknown"` fallback chain.
+- Additional improvement: Added `console.log` statements for each event type so errors are visible in the Convex Dashboard logs.
+
 ### Preventative rules
 - After changing `next.config.ts`, always restart the dev server (or clear `.next` cache).
 - Every image component should use `normalizeImageSrc()` and have a fallback.
 - When adding new remote image hosts, add them to `next.config.ts > images.remotePatterns`.
 - Never trust third-party demo storage URLs long-term — they expire. Use local assets for seed/mock data.
+- `.env.local` is ONLY for Next.js. Convex server-side env vars must be set via `npx convex env set` or the Convex Dashboard.
+- Always wrap `svix` `wh.verify()` in try-catch — verification failures throw, they don't return null.
+- Never trust Clerk event fields like `first_name` to be non-null — always provide fallbacks for OAuth-based sign-ups.
+- Clerk `email_addresses` can be empty on user.created; use optional chaining and a fallback email (e.g. `id@clerk.user`).
+- For webhook-called internal mutations, consider no-op when the entity doesn't exist so the webhook returns 200 and avoids endless retries.
+
+### Issue 7: user.created crash — "Cannot read properties of undefined (reading 'email_address')"
+- Summary: After setting CLERK_WEBHOOK_SECRET and deploying with `npx convex dev`, user.created still failed at http.ts line 26.
+- Root cause: Clerk can send `user.created` with an **empty `email_addresses`** array (e.g. OAuth before email is linked). Code used `event.data.email_addresses[0].email_address` without checking, so `[0]` was undefined.
+- Fix in convex/http.ts: Use optional chaining and fallbacks — `primaryEmail = event.data.email_addresses?.[0]?.email_address`, `email = primaryEmail ?? \`${event.data.id}@clerk.user\``, `imageUrl: event.data.image_url ?? ""`. Same for user.updated.
+- Follow-up: updateUser/deleteUser threw "User not found" when the user had never been created (e.g. earlier user.created failed). Fix in convex/user.ts: In the internal mutations updateUser and deleteUser, if user is not found, return without throwing so the webhook returns 200 and Clerk retries stop (idempotent behavior).
