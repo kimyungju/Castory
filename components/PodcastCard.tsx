@@ -2,6 +2,10 @@
 
 import React from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import { normalizeImageSrc } from "@/lib/utils";
 import { Headphones } from "lucide-react";
 
@@ -14,14 +18,22 @@ const PodcastCard = ({
   imgURL: string;
   title: string;
   description: string;
-  podcastId: number | string;
+  podcastId: Id<"podcasts">;
 }) => {
+  const router = useRouter();
+  const updateViews = useMutation(api.podcast.updatePodcastViews);
   const [src, setSrc] = React.useState(() => normalizeImageSrc(imgURL));
   const [isHovered, setIsHovered] = React.useState(false);
+
+  const handleClick = async () => {
+    await updateViews({ podcastId });
+    router.push(`/podcast/${podcastId}`, { scroll: true });
+  };
 
   return (
     <div
       className="cursor-pointer group animate-rotate-in"
+      onClick={handleClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -80,13 +92,6 @@ const PodcastCard = ({
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Floating Number Badge */}
-        <div className="absolute -top-3 -right-3 bg-charcoal border-4 border-orange-1 w-12 h-12 flex items-center justify-center transform rotate-12 shadow-brutal z-10">
-          <span className="text-16 font-black text-orange-1 transform -rotate-12">
-            {podcastId}
-          </span>
         </div>
       </figure>
     </div>

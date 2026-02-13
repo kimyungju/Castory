@@ -24,13 +24,23 @@ export const createPodcast = mutation({
     }
 
     // Get the user from the database
-    const user = await ctx.db
+    let user = await ctx.db
       .query("users")
       .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
       .unique();
 
     if (!user) {
-      throw new ConvexError("User not found");
+      // User hasn't been synced via webhook yet — create from auth identity
+      const userId = await ctx.db.insert("users", {
+        clerkId: identity.subject,
+        email: identity.email ?? `${identity.subject}@clerk.user`,
+        name: identity.name ?? identity.email?.split("@")[0] ?? "Unknown",
+        imageUrl: identity.pictureUrl ?? "",
+      });
+      user = await ctx.db.get(userId);
+      if (!user) {
+        throw new ConvexError("Failed to create user");
+      }
     }
 
     // Insert the podcast
@@ -60,6 +70,38 @@ export const getTrendingPodcasts = query({
   args: {},
   handler: async (ctx) => {
     return await ctx.db.query("podcasts").collect();
+  },
+});
+
+export const getPodcastById = query({
+  args: { podcastId: v.id("podcasts") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.podcastId);
+  },
+});
+
+export const getPodcastByVoiceType = query({
+  args: { podcastId: v.id("podcasts") },
+  handler: async (ctx, args) => {
+    const podcast = await ctx.db.get(args.podcastId);
+    return await ctx.db
+      .query("podcasts")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("voiceType"), podcast?.voiceType),
+          q.neq(q.field("_id"), args.podcastId)
+        )
+      )
+      .collect();
+  },
+});
+
+export const updatePodcastViews = mutation({
+  args: { podcastId: v.id("podcasts") },
+  handler: async (ctx, args) => {
+    const podcast = await ctx.db.get(args.podcastId);
+    if (!podcast) throw new ConvexError("Podcast not found");
+    return await ctx.db.patch(args.podcastId, { views: podcast.views + 1 });
   },
 });
 
