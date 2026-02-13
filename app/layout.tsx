@@ -18,6 +18,8 @@ const crimsonPro = Crimson_Pro({
   style: ["normal", "italic"],
 });
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Podcaster",
   description: "Generate your podcasts using AI",
