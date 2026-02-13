@@ -4,6 +4,45 @@ import { action } from "./_generated/server";
 import { v } from "convex/values";
 import OpenAI from "openai";
 
+const TTS_MAX_CHARS = 4096;
+
+function splitText(text: string, maxLen: number): string[] {
+  if (text.length <= maxLen) return [text];
+
+  const chunks: string[] = [];
+  let remaining = text;
+
+  while (remaining.length > 0) {
+    if (remaining.length <= maxLen) {
+      chunks.push(remaining);
+      break;
+    }
+
+    const window = remaining.slice(0, maxLen);
+    const sentenceEnd = Math.max(
+      window.lastIndexOf(". "),
+      window.lastIndexOf("! "),
+      window.lastIndexOf("? "),
+      window.lastIndexOf(".\n"),
+      window.lastIndexOf("!\n"),
+      window.lastIndexOf("?\n"),
+    );
+
+    let splitAt: number;
+    if (sentenceEnd > maxLen * 0.3) {
+      splitAt = sentenceEnd + 1;
+    } else {
+      const lastSpace = window.lastIndexOf(" ");
+      splitAt = lastSpace > 0 ? lastSpace : maxLen;
+    }
+
+    chunks.push(remaining.slice(0, splitAt).trim());
+    remaining = remaining.slice(splitAt).trim();
+  }
+
+  return chunks;
+}
+
 export const generateAudioAction = action({
   args: {
     input: v.string(),
@@ -19,48 +58,30 @@ export const generateAudioAction = action({
     const openai = new OpenAI({ apiKey });
 
     try {
-      const mp3Response = await openai.audio.speech.create({
-        model: "tts-1",
-        voice: args.voice as "alloy" | "shimmer" | "nova" | "echo" | "fable" | "onyx",
-        input: args.input,
-      });
+      const chunks = splitText(args.input, TTS_MAX_CHARS);
 
-      const arrayBuffer = await mp3Response.arrayBuffer();
-      return arrayBuffer;
+      const audioBuffers: ArrayBuffer[] = [];
+      for (const chunk of chunks) {
+        const mp3Response = await openai.audio.speech.create({
+          model: "tts-1",
+          voice: args.voice as "alloy" | "shimmer" | "nova" | "echo" | "fable" | "onyx",
+          input: chunk,
+        });
+        audioBuffers.push(await mp3Response.arrayBuffer());
+      }
+
+      const totalLength = audioBuffers.reduce((sum, buf) => sum + buf.byteLength, 0);
+      const combined = new Uint8Array(totalLength);
+      let offset = 0;
+      for (const buf of audioBuffers) {
+        combined.set(new Uint8Array(buf), offset);
+        offset += buf.byteLength;
+      }
+
+      return combined.buffer;
     } catch (error) {
       throw new Error(`Failed to generate audio: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
-  },
-});
-
-export const enhancePromptAction = action({
-  args: {
-    prompt: v.string(),
-    type: v.union(v.literal("audio"), v.literal("image")),
-  },
-  handler: async (ctx, args): Promise<string> => {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) throw new Error("OPENAI_API_KEY is not set");
-
-    const openai = new OpenAI({ apiKey });
-
-    const systemPrompt =
-      args.type === "audio"
-        ? "You are an expert at improving text for text-to-speech. Improve the given text for clarity, expressiveness, and TTS readability. Preserve the original intent and tone. Return only the improved text, nothing else."
-        : "You are an expert at writing DALL-E image generation prompts. Improve the given prompt for visual clarity, composition, and style detail. Return only the improved prompt, nothing else.";
-
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: args.prompt },
-      ],
-    });
-
-    const content = response.choices[0]?.message?.content;
-    if (!content) throw new Error("No response from OpenAI");
-
-    return content.trim();
   },
 });
 
