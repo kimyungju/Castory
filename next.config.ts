@@ -9,11 +9,23 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "kindly-shepherd-609.convex.cloud",
+      },
+      {
+        protocol: "https",
         hostname: "oaidalleapiprodscus.blob.core.windows.net",
       },
       {
         protocol: "https",
         hostname: "img.clerk.com",
+      },
+      {
+        protocol: "https",
+        hostname: "randomuser.me",
+      },
+      {
+        protocol: "https",
+        hostname: "picsum.photos",
       },
     ],
   },
